@@ -1,93 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CineScan+ — Admin Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<style>
-:root{--bg:#041029;--panel:#071733;--muted:#9fb4d6;--neon:#19a0ff;--glass:rgba(255,255,255,0.02);}
-body{margin:0;font-family:Inter,system-ui;background:linear-gradient(180deg,#03112a 0%,var(--bg) 60%);color:#dff3ff;padding:26px;}
-.container{max-width:1200px;margin:0 auto;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-.logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,rgba(25,160,255,0.12),rgba(15,216,255,0.06));display:flex;align-items:center;justify-content:center;font-family:Orbitron;color:var(--neon);font-weight:700;font-size:18px;}
-.layout{display:grid;grid-template-columns:280px 1fr;gap:18px;}
-.panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),var(--glass));border-radius:12px;padding:16px;border:1px solid rgba(25,160,255,0.06);box-shadow:0 10px 40px rgba(0,0,0,0.6);}
-.nav{display:flex;flex-direction:column;gap:8px;}
-.nav button{padding:10px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-weight:600;text-align:left;cursor:pointer;}
-.nav button.active{color:var(--neon);border:1px solid rgba(25,160,255,0.08);background:linear-gradient(90deg,rgba(25,160,255,0.02),rgba(15,216,255,0.01));}
-.table{width:100%;border-collapse:collapse;}
-.table th,.table td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.05);font-size:13px;}
-.table th{color:var(--muted);}
-.small{font-size:13px;color:var(--muted);}
-.status-pill{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;}
-.status-used{background:rgba(25,160,255,0.08);color:var(--neon);}
-.status-unused{background:rgba(255,255,255,0.04);color:var(--muted);}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - CineScan</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #1c1c1c;
+      color: #fff;
+      padding: 20px 50px;
+      text-align: center;
+      font-size: 1.5em;
+      letter-spacing: 1px;
+    }
+
+    .admin {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 28px;
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .sidebar {
+      background: #232323;
+      color: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #f9ca24;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      padding: 12px 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #333;
+      transition: background 0.3s;
+    }
+
+    .sidebar ul li:hover {
+      background: #444;
+    }
+
+    .content {
+      background: #fff;
+      border-radius: 16px;
+      padding: 25px;
+      min-height: 600px;
+      min-width: 900px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #222;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    table th {
+      background: #f0f0f0;
+    }
+
+    button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #1c1c1c;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #f9ca24;
+      color: #000;
+    }
+
+    @media (max-width: 900px) {
+      .admin {
+        grid-template-columns: 1fr;
+      }
+      .content {
+        min-width: unset;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-<header>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <div class="logo">CS+</div>
-    <div><div style="font-family:Orbitron;">CineScan+ Admin</div><div class="small">Live ticket monitoring</div></div>
-  </div>
-  <div>
-    <button onclick="window.location.href='index.html'" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(25,160,255,0.08);background:transparent;color:var(--neon);font-weight:700;margin-right:6px;">← Back</button>
-    <button onclick="location.reload()" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(25,160,255,0.08);background:transparent;color:var(--neon);font-weight:700;">Refresh</button>
-  </div>
-</header>
+  <header>
+    🎬 CineScan Admin Dashboard
+  </header>
 
-<div class="layout">
-  <div class="panel nav">
-    <button class="active" id="nav-overview">Overview</button>
-    <button id="nav-tickets">Tickets</button>
-    <button id="nav-logs">Logs</button>
-    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.05)">
-    <div class="small">Quick actions</div>
-    <button id="nav-fetch">Fetch Latest</button>
-    <button id="nav-clear">Clear Used Marks</button>
+  <div class="admin">
+    <aside class="sidebar">
+      <h2>Menu</h2>
+      <ul>
+        <li onclick="loadTickets()">🎟 View Tickets</li>
+        <li onclick="window.location.href='/'">🏠 Back to Home</li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <h1>Tickets Management</h1>
+      <table id="ticket-table">
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Holder Name</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
   </div>
 
-  <div id="main" class="panel" style="min-height:600px;overflow:auto;">
-    <!-- Overview -->
-    <div id="section-overview">
-      <div style="display:flex;justify-content:space-between;align-items:center;"><h3 style="font-family:Orbitron;color:var(--neon)">Overview</h3><div class="small">Auto refresh every 5s</div></div>
-      <canvas id="ticketChart" style="height:200px;margin:10px 0;"></canvas>
-      <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <div class="small">Used: <strong id="usedCount">0</strong></div>
-        <div class="small">Unused: <strong id="unusedCount">0</strong></div>
-        <div class="small">Total: <strong id="totalCount">0</strong></div>
-        <div class="small">Updated: <span id="summaryTime">--</span></div>
-      </div>
-      <table class="table" id="ticketTable"><thead><tr><th>ID</th><th>Movie</th><th>Seat</th><th>Status</th></tr></thead><tbody></tbody></table>
-    </div>
-    <!-- Tickets -->
-    <div id="section-tickets" style="display:none"><h3 style="font-family:Orbitron;color:var(--neon)">Tickets</h3><table class="table" id="ticketList"><thead><tr><th>ID</th><th>Movie</th><th>Seat</th><th>Status</th></tr></thead><tbody></tbody></table></div>
-    <!-- Logs -->
-    <div id="section-logs" style="display:none"><h3 style="font-family:Orbitron;color:var(--neon)">Logs</h3><div id="logsArea" style="font-family:monospace;font-size:13px;margin-top:8px;color:#bfe9ff"></div></div>
-    <!-- Fetch -->
-    <div id="section-fetch" style="display:none"><h3 style="font-family:Orbitron;color:var(--neon)">Fetch Latest</h3><button class="btn-neon" id="fetchNow" style="margin-top:8px;">Fetch Now</button><div id="fetchStatus" class="small" style="margin-top:6px;">Ready</div></div>
-    <!-- Clear -->
-    <div id="section-clear" style="display:none"><h3 style="font-family:Orbitron;color:var(--neon)">Clear Used Marks</h3><button class="btn-neon" id="clearNow" style="margin-top:8px;">Clear Used Marks</button><div id="clearStatus" class="small" style="margin-top:6px;">Awaiting action...</div></div>
-  </div>
-</div>
-</div>
+  <script>
+    async function loadTickets() {
+      const res = await fetch('/api/tickets');
+      const data = await res.json();
+      const tbody = document.querySelector('#ticket-table tbody');
+      tbody.innerHTML = '';
+      data.tickets.forEach(t => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${t.ticket_id}</td>
+          <td>${t.holder_name}</td>
+          <td>${t.used ? '✅ Used' : '🟢 Active'}</td>
+          <td>${t.used ? '' : `<button onclick="markUsed('${t.ticket_id}')">Mark Used</button>`}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
 
-<script>
-const API="http://127.0.0.1:8000/admin/tickets",CLEAR_API="http://127.0.0.1:8000/admin/clear-used";
-let ticketChart=null;
-function chart(used,unused){const ctx=document.getElementById('ticketChart').getContext('2d');if(ticketChart)ticketChart.destroy();ticketChart=new Chart(ctx,{type:'doughnut',data:{labels:['Used','Unused'],datasets:[{data:[used,unused],backgroundColor:['rgba(25,160,255,0.95)','rgba(13,82,138,0.9)']}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#bfe9ff'}}},maintainAspectRatio:false,cutout:'62%'}});}
-async function fetchData(){try{const r=await fetch(API);const d=await r.json();const t=d.tickets||[],u=t.filter(x=>x.status==='used').length,n=t.filter(x=>x.status==='unused').length;chart(u,n);usedCount.innerText=u;unusedCount.innerText=n;totalCount.innerText=t.length;summaryTime.innerText=new Date().toLocaleTimeString();ticketTable.querySelector('tbody').innerHTML=t.slice().reverse().map(e=>`<tr><td>${e.id}</td><td>${e.movie_name}</td><td>${e.seat_no}</td><td><span class="status-pill ${e.status==='used'?'status-used':'status-unused'}">${e.status.toUpperCase()}</span></td></tr>`).join('');ticketList.querySelector('tbody').innerHTML=t.map(e=>`<tr><td>${e.id}</td><td>${e.movie_name}</td><td>${e.seat_no}</td><td>${e.status.toUpperCase()}</td></tr>`).join('');log('Fetched '+t.length+' tickets');}catch(e){log('Fetch error: '+e.message);}}
-async function clearUsed(){try{const r=await fetch(CLEAR_API,{method:'POST'});if(!r.ok)throw new Error('Server '+r.status);log('Cleared used marks');await fetchData();}catch(e){log('Clear error: '+e.message);}}
-function log(m){const ts=new Date().toLocaleTimeString();logsArea.insertAdjacentHTML('afterbegin',`<div>[${ts}] ${m}</div>`);}
-const sections=['overview','tickets','logs','fetch','clear'];const show=s=>{sections.forEach(x=>document.getElementById('section-'+x).style.display=x===s?'block':'none');sections.forEach(x=>document.getElementById('nav-'+x).classList.toggle('active',x===s));};
-sections.forEach(x=>document.getElementById('nav-'+x).addEventListener('click',()=>show(x)));
-fetchNow.onclick=async()=>{fetchStatus.innerText='Fetching...';await fetchData();fetchStatus.innerText='Done';setTimeout(()=>fetchStatus.innerText='Ready',2000);}
-clearNow.onclick=async()=>{if(!confirm('Clear all used markers?'))return;clearStatus.innerText='Clearing...';await clearUsed();clearStatus.innerText='Done';setTimeout(()=>clearStatus.innerText='Awaiting action...',2000);}
-chart(0,0);fetchData();setInterval(fetchData,5000);
-</script>
+    async function markUsed(ticket_id) {
+      const res = await fetch('/api/mark_used', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert(`✅ Ticket ${ticket_id} marked as used`);
+        loadTickets();
+      } else {
+        alert(`⚠️ ${data.error}`);
+      }
+    }
+
+    // Load tickets on page open
+    loadTickets();
+  </script>
 </body>
 </html>
