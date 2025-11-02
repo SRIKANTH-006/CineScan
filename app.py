@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, g
 import sqlite3, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(HERE, 'tickets.db')
-app = Flask(__name__, static_folder='static', template_folder='.')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 def get_db():
     db = getattr(g, '_database', None)
