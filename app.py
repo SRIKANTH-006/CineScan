@@ -1,14 +1,13 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify, g, send_from_directory
 import sqlite3, os
 
-# --- Paths and setup ---
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(HERE, 'tickets.db')
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 
-# --- Database connection helpers ---
+# ---------- DATABASE SETUP ----------
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -24,17 +23,18 @@ def close_connection(exception):
         db.close()
 
 
-# --- Routes ---
+# ---------- ROUTES ----------
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Serve admin.html file when JS requests it
+@app.route('/load_admin')
+def load_admin():
+    return send_from_directory('templates', 'admin.html')
 
-@app.route('/admin')
-def admin():
-    return render_template('admin.html')
 
-
+# ---------- API ROUTES ----------
 @app.route('/api/tickets')
 def tickets():
     rows = get_db().execute(
@@ -84,9 +84,8 @@ def mark_used():
     return jsonify({'ok': True, 'ticket_id': ticket_id})
 
 
-# --- App entry point ---
+# ---------- ENTRY POINT ----------
 if __name__ == '__main__':
-    # Initialize DB if missing
     if not os.path.exists(DATABASE):
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
@@ -108,6 +107,5 @@ if __name__ == '__main__':
         conn.commit()
         conn.close()
 
-    # Dynamic port for Render or local run
     port = int(os.environ.get('PORT', 8000))
     app.run(debug=True, host='0.0.0.0', port=port)

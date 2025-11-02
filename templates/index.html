@@ -17,7 +17,7 @@
       --bg:#071023;
       --panel:#0b1530;
       --muted:#9fb4d6;
-      --neon:#19a0ff; /* cyber blue */
+      --neon:#19a0ff;
       --accent:#0fd8ff33;
       --glass: rgba(255,255,255,0.03);
       --glass-2: rgba(255,255,255,0.02);
@@ -28,8 +28,6 @@
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       background: radial-gradient(1200px 600px at 10% 10%, #031029 0%, var(--bg) 30%), linear-gradient(180deg, rgba(9,20,38,0.6), rgba(3,6,16,0.6));
       color:#dbeeff;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       padding:28px;
     }
 
@@ -42,7 +40,6 @@
       align-items:start;
     }
 
-    /* Left panel (scanner) */
     .panel {
       background: linear-gradient(180deg, rgba(255,255,255,0.02), var(--glass-2));
       border-radius:14px;
@@ -88,7 +85,6 @@
       box-shadow: 0 8px 30px rgba(2,8,20,0.7);
     }
 
-    /* Neon frame lines */
     #reader::before, #reader::after {
       content:"";
       position:absolute; inset:0; pointer-events:none;
@@ -124,9 +120,9 @@
       color:var(--neon);
       padding:8px 12px;border-radius:10px;font-weight:700;
       box-shadow: 0 6px 18px rgba(15,160,255,0.06);
+      cursor:pointer;
     }
 
-    /* Right panel (log & info) */
     .right {
       display:flex;flex-direction:column;gap:18px;
     }
@@ -155,7 +151,6 @@
 
     footer { text-align:center; color:var(--muted); margin-top:18px; font-size:13px; }
 
-    /* Responsive */
     @media (max-width:980px){
       .app{ grid-template-columns:1fr; padding:12px; gap:16px; }
       #reader{ height:320px; }
@@ -163,7 +158,7 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="app" id="mainContent">
     <!-- Left: Scanner -->
     <div class="panel">
       <div class="brand">
@@ -196,118 +191,80 @@
 
     <!-- Right: Info & logs -->
     <div class="right">
-     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-  <div>
-    <div style="font-family:Orbitron, monospace;color:var(--neon)">Quick Controls</div>
-    <div style="color:var(--muted);font-size:13px;margin-top:6px">Manual verify / reset stats / admin</div>
-  </div>
-  <div style="display:flex;gap:8px">
-    <button class="btn-neon" id="manualVerify">Manual Verify</button>
-    <button class="btn-neon" id="resetStats">Reset</button>
-    <button class="btn-neon" id="goAdmin">Admin</button>
-  </div>
-</div>
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-family:Orbitron, monospace;color:var(--neon)">Quick Controls</div>
+          <div style="color:var(--muted);font-size:13px;margin-top:6px">Manual verify / reset stats / admin</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-neon" id="manualVerify">Manual Verify</button>
+          <button class="btn-neon" id="resetStats">Reset</button>
+          <button class="btn-neon" id="goAdmin">Admin</button>
+        </div>
+      </div>
 
-</div>
-
-
-        <div class="metrics" style="margin-top:12px;">
-          <div class="metric">
-            <h3 id="totalScans">0</h3>
-            <p>Total scans</p>
-          </div>
-          <div class="metric">
-            <h3 id="validCount">0</h3>
-            <p>Valid tickets</p>
-          </div>
-          <div class="metric">
-            <h3 id="fraudCount">0</h3>
-            <p>Flagged / Reused</p>
-          </div>
+      <div class="metrics" style="margin-top:12px;">
+        <div class="metric">
+          <h3 id="totalScans">0</h3>
+          <p>Total scans</p>
+        </div>
+        <div class="metric">
+          <h3 id="validCount">0</h3>
+          <p>Valid tickets</p>
+        </div>
+        <div class="metric">
+          <h3 id="fraudCount">0</h3>
+          <p>Flagged / Reused</p>
         </div>
       </div>
 
       <div class="card">
         <div style="font-family:Orbitron, monospace;color:var(--neon)">Scan Log</div>
-        <div class="log" id="logArea">
-          <!-- dynamic entries -->
-        </div>
+        <div class="log" id="logArea"></div>
       </div>
+
       <footer>© CineScan+ — Cyber Blue UI • Built for vigilant scanning</footer>
     </div>
   </div>
 
   <script>
-    // Basic scanner + UI wiring (works offline with existing backend)
     const resultEl = document.getElementById('result');
     const logArea = document.getElementById('logArea');
     const totalScans = document.getElementById('totalScans');
     const validCount = document.getElementById('validCount');
     const fraudCount = document.getElementById('fraudCount');
-    const lastSync = document.getElementById('lastSync');
     const fpsEl = document.getElementById('fps');
 
     let counts = { total:0, valid:0, fraud:0 };
 
     function addLog(message, type='info') {
       const ts = new Date().toLocaleTimeString();
-      counts.total += (type!=='info') ? 1 : 1;
+      counts.total += 1;
       totalScans.innerText = counts.total;
       if(type==='valid') validCount.innerText = ++counts.valid;
       if(type==='fraud') fraudCount.innerText = ++counts.fraud;
 
       const node = document.createElement('div');
       node.className = 'entry';
-      node.innerHTML = `<div style="display:flex;flex-direction:column">
-                          <div style="font-weight:600">${message}</div>
-                          <div class="muted ts">${ts}</div>
-                        </div>
-                        <div style="color:${ type==='fraud' ? '#ff8b8b' : (type==='valid' ? '#baf7d6' : '#9fb4d6') }">${type.toUpperCase()}</div>`;
+      node.innerHTML = `<div><div style="font-weight:600">${message}</div><div class="muted ts">${ts}</div></div><div style="color:${ type==='fraud' ? '#ff8b8b' : (type==='valid' ? '#baf7d6' : '#9fb4d6') }">${type.toUpperCase()}</div>`;
       logArea.prepend(node);
     }
 
-    // scanner success handler
     async function onScanSuccess(decodedText) {
-      // optimistic UI update
       resultEl.innerHTML = `<div style="font-weight:700">${decodedText}</div>`;
       addLog('Scanned: ' + decodedText, 'info');
-
-      // verify with backend
-      try {
-        const res = await fetch("http://127.0.0.1:8000/verify", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ qr_data: decodedText })
-        });
-        const data = await res.json();
-        lastSync.innerText = new Date().toLocaleTimeString();
-
-        if(data && data.status === 'ok' && data.valid === true) {
-          resultEl.innerHTML = `<div style="font-weight:700;color:#baf7d6">VALID — ${data.message || 'OK'}</div>`;
-          addLog('VALID — ' + (data.message||'OK'), 'valid');
-        } else {
-          resultEl.innerHTML = `<div style="font-weight:700;color:#ff9b9b">FLAGGED — ${data.message || 'Invalid / Reused'}</div>`;
-          addLog('FLAGGED — ' + (data.message||'Invalid / Reused'), 'fraud');
-        }
-      } catch (err) {
-        resultEl.innerHTML = `<div style="font-weight:700;color:var(--muted)">Network error</div>`;
-        addLog('Network error while verifying: ' + err.message, 'info');
-      }
     }
 
-    // initialize scanner
-    const html5QrCode = new Html5Qrcode("reader", /* verbose= */ false);
+    const html5QrCode = new Html5Qrcode("reader", false);
     let isRunning = true;
     const constraints = { facingMode: "environment" };
     const config = { fps: 10, qrbox: { width: 300, height: 300 } };
     fpsEl.innerText = config.fps;
 
-    html5QrCode.start(constraints, config, onScanSuccess).catch(err=>{
-      // fallback UI
-      document.getElementById('reader').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Camera unavailable — please allow camera permissions or use a supported device.</div>';
+    html5QrCode.start(constraints, config, onScanSuccess).catch(() => {
+      document.getElementById('reader').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Camera unavailable</div>';
     });
 
-    // Pause/resume toggle
     document.getElementById('toggleCamera').addEventListener('click', async () => {
       const btn = document.getElementById('toggleCamera');
       if(isRunning){
@@ -321,24 +278,34 @@
       }
     });
 
-    // Quick controls
     document.getElementById('manualVerify').addEventListener('click', ()=>{
-      const code = prompt('Enter QR data / code to verify manually:');
+      const code = prompt('Enter QR data to verify manually:');
       if(code) onScanSuccess(code);
     });
+
     document.getElementById('resetStats').addEventListener('click', ()=>{
       counts = { total:0, valid:0, fraud:0 };
       totalScans.innerText = validCount.innerText = fraudCount.innerText = '0';
       logArea.innerHTML = '';
-      lastSync.innerText = '--';
-      addLog('Stats reset by operator', 'info');
+      addLog('Stats reset', 'info');
     });
-    // Admin button navigation
-document.getElementById('goAdmin').addEventListener('click', () => {
-  window.location.href = 'admin.html';
-});
 
-
+    // 🧠 Updated Admin button (Dynamic load)
+    document.getElementById('goAdmin').addEventListener('click', async ()=>{
+      const main = document.getElementById('mainContent');
+      main.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Loading Admin Panel...</div>';
+      try {
+        const res = await fetch('/load_admin');
+        if(res.ok){
+          const html = await res.text();
+          main.innerHTML = html;
+        } else {
+          main.innerHTML = '<div style="text-align:center;padding:40px;color:#ff9b9b">Failed to load Admin Page.</div>';
+        }
+      } catch {
+        main.innerHTML = '<div style="text-align:center;padding:40px;color:#ff9b9b">Network error while loading Admin Page.</div>';
+      }
+    });
   </script>
 </body>
 </html>
