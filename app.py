@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, g, send_from_directory
 import sqlite3, os
 
+# ---------- PATHS ----------
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(HERE, 'tickets.db')
 
@@ -28,10 +29,16 @@ def close_connection(exception):
 def index():
     return render_template('index.html')
 
-# Serve admin.html file when JS requests it
-@app.route('/load_admin')
-def load_admin():
-    return send_from_directory('templates', 'admin.html')
+
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+
+@app.route('/scan')
+def scan():
+    """Scanner page route"""
+    return render_template('scan.html')
 
 
 # ---------- API ROUTES ----------
@@ -84,8 +91,8 @@ def mark_used():
     return jsonify({'ok': True, 'ticket_id': ticket_id})
 
 
-# ---------- ENTRY POINT ----------
-if __name__ == '__main__':
+# ---------- INITIAL DB CREATION ----------
+def init_db():
     if not os.path.exists(DATABASE):
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
@@ -106,6 +113,13 @@ if __name__ == '__main__':
         c.executemany('INSERT INTO tickets (ticket_id, holder_name, used) VALUES (?,?,?)', sample)
         conn.commit()
         conn.close()
+        print("✅ Database created with sample tickets.")
+    else:
+        print("✅ Database already exists.")
 
+
+# ---------- MAIN ----------
+if __name__ == '__main__':
+    init_db()
     port = int(os.environ.get('PORT', 8000))
     app.run(debug=True, host='0.0.0.0', port=port)

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CineScan - QR Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #reader {
+            width: 320px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        button {
+            background-color: #ff4757;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #ff6b81;
+        }
+    </style>
+</head>
+<body>
+    <h1>CineScan - QR Scanner</h1>
+    <div id="reader"></div>
+    <div class="result" id="result">Scan a QR Code...</div>
+    <button onclick="window.location.href='/'">Go Back</button>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('result').innerHTML = `Scanned Ticket ID: ${decodedText}`;
+            
+            // Send scanned ticket to Flask
+            fetch(`/api/ticket/${decodedText}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.found) {
+                        alert(`✅ Ticket found for ${data.holder_name}. Used: ${data.used}`);
+                    } else {
+                        alert('❌ Invalid or not found ticket.');
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        function onScanFailure(error) {
+            console.warn(`Scan error: ${error}`);
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            onScanSuccess,
+            onScanFailure
+        );
+    </script>
+</body>
+</html>
